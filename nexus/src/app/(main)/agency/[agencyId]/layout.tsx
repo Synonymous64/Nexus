@@ -1,3 +1,5 @@
+import BlurPage from "@/components/global/blur-page";
+import InfoBar from "@/components/global/infobar";
 import Sidebar from "@/components/sidebar";
 import Unauthorized from "@/components/unauthorized";
 import {
@@ -16,6 +18,7 @@ type Props = {
 const layout = async ({ children, params }: Props) => {
   const agencyId = await verifyAndAcceptInvitation();
   const user = await currentUser();
+
   if (!user) {
     return redirect("/");
   }
@@ -33,10 +36,16 @@ const layout = async ({ children, params }: Props) => {
   let allNoti: any = [];
   const notifications = await getNotificationAndUser(agencyId);
   if (notifications) allNoti = notifications;
+
   return (
     <div className="h-screen overflow-hidden">
       <Sidebar id={params.agencyId} type="agency" />
-      <div className="md:pl-[300px]">{children}</div>
+      <div className="md:pl-[300px]">
+        <InfoBar notifications={allNoti} role={allNoti.User?.role} />
+        <div className="relative">
+          <BlurPage>{children}</BlurPage>
+        </div>
+      </div>
     </div>
   );
 };

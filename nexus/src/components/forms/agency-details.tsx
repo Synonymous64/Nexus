@@ -48,8 +48,8 @@ import {
 import { Button } from "../ui/button";
 import Loading from "../global/loading";
 
-interface Props {
-  data?: Partial<Agency>;
+type Props = {
+  data?: Partial<Agency>
 }
 
 const FormSchema = z.object({
