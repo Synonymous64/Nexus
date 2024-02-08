@@ -1,11 +1,11 @@
 "use client";
 import { Agency } from "@prisma/client";
+import { useForm } from "react-hook-form";
 import React, { useEffect, useState } from "react";
-import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/navigation";
 import { NumberInput } from "@tremor/react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 } from "uuid";
+
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
   CardContent,
@@ -33,7 +34,8 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useForm } from "react-hook-form";
+import { useToast } from "../ui/use-toast";
+
 import * as z from "zod";
 import FileUpload from "../global/file-upload";
 import { Input } from "../ui/input";
@@ -49,8 +51,8 @@ import { Button } from "../ui/button";
 import Loading from "../global/loading";
 
 type Props = {
-  data?: Partial<Agency>
-}
+  data?: Partial<Agency>;
+};
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Agency name must be atleast 2 chars." }),
@@ -85,7 +87,6 @@ const AgencyDetails = ({ data }: Props) => {
       agencyLogo: data?.agencyLogo,
     },
   });
-
   const isLoading = form.formState.isSubmitting;
 
   useEffect(() => {
@@ -96,8 +97,8 @@ const AgencyDetails = ({ data }: Props) => {
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
-      let newUserData
-      let custId
+      let newUserData;
+      let custId;
       if (!data?.id) {
         const bodyData = {
           email: values.companyEmail,
@@ -119,25 +120,26 @@ const AgencyDetails = ({ data }: Props) => {
             postal_code: values.zipCode,
             state: values.zipCode,
           },
-        }
+        };
 
-        const customerResponse = await fetch('/api/stripe/create-customer', {
-          method: 'POST',
+        const customerResponse = await fetch("/api/stripe/create-customer", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(bodyData),
-        })
+        });
         const customerData: { customerId: string } =
-          await customerResponse.json()
-        custId = customerData.customerId
+          await customerResponse.json();
+        custId = customerData.customerId;
       }
 
-      newUserData = await initUser({ role: 'AGENCY_OWNER' })
-      if (!data?.id) return
+      newUserData = await initUser({ role: "AGENCY_OWNER" });
+      if (!data?.customerId && !custId) return;
 
       const response = await upsertAgency({
         id: data?.id ? data.id : v4(),
+        customerId: data?.customerId || custId || "",
         address: values.address,
         agencyLogo: values.agencyLogo,
         city: values.city,
@@ -150,44 +152,42 @@ const AgencyDetails = ({ data }: Props) => {
         createdAt: new Date(),
         updatedAt: new Date(),
         companyEmail: values.companyEmail,
-        connectAccountId: '',
+        connectAccountId: "",
         goal: 5,
-      })
+      });
       toast({
-        title: 'Created Agency',
-      })
-      if (data?.id) return router.refresh()
+        title: "Created Agency",
+      });
+      if (data?.id) return router.refresh();
       if (response) {
-        return router.refresh()
+        return router.refresh();
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast({
-        variant: 'destructive',
-        title: 'Oppse!',
-        description: 'could not create your agency',
-      })
+        variant: "destructive",
+        title: "Oppse!",
+        description: "could not create your agency",
+      });
     }
-  }
+  };
   const handleDeleteAgency = async () => {
-    if (!data?.id) return setDeletingAgency(true);
-
-    // WIP discontinue the subscription
-
+    if (!data?.id) return;
+    setDeletingAgency(true);
+    //WIP: discontinue the subscription
     try {
       const response = await deleteAgency(data.id);
       toast({
         title: "Deleted Agency",
-        description: "Your agency is successfully deleted with all subaccounts",
+        description: "Deleted your agency and all subaccounts",
       });
       router.refresh();
     } catch (error) {
       console.log(error);
-
       toast({
         variant: "destructive",
-        title: "Opps!",
-        description: "Could not delete your agency with all subaccounts",
+        title: "Oppse!",
+        description: "could not delete your agency ",
       });
     }
     setDeletingAgency(false);
@@ -348,7 +348,7 @@ const AgencyDetails = ({ data }: Props) => {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Zipcode</FormLabel>
+                      <FormLabel>Zipcpde</FormLabel>
                       <FormControl>
                         <Input placeholder="Zipcode" {...field} />
                       </FormControl>
@@ -401,6 +401,7 @@ const AgencyDetails = ({ data }: Props) => {
               </Button>
             </form>
           </Form>
+
           {data?.id && (
             <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div>
