@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import clsx from 'clsx'
-import SubscriptionHelper from './_components/subscription-helper'
+// import SubscriptionHelper from './_components/subscription-helper'
 
 type Props = {
   params: { agencyId: string }
@@ -64,11 +64,11 @@ const page = async ({ params }: Props) => {
 
   return (
     <>
-      <SubscriptionHelper
+      {/* <SubscriptionHelper
         prices={prices.data}
         customerId={agencySubscription?.customerId || ''}
         planExists={agencySubscription?.Subscription?.active === true}
-      />
+      /> */}
       <h1 className="text-4xl p-4">Billing</h1>
       <Separator className=" mb-6" />
       <h2 className="text-2xl p-4">Current Plan</h2>
@@ -88,7 +88,7 @@ const page = async ({ params }: Props) => {
               : 'Get Started'
           }
           highlightDescription="Want to modify your plan? You can do this here. If you have
-          further question contact support@plura-app.com"
+          further question contact support@Nexus-app.com"
           highlightTitle="Plan Options"
           description={
             agencySubscription?.Subscription?.active === true
